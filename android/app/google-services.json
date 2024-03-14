@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "683829861320",
+    "project_id": "intellicaredex",
+    "storage_bucket": "intellicaredex.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:683829861320:android:024eb3da8ef41552e83efd",
+        "android_client_info": {
+          "package_name": "com.intellicaredex"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "683829861320-7pamdlqhc162htjeevb7oc7346vm056b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxLhCLEdT-3OHDQHlBuHVuO8O8GByozW8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "683829861320-7pamdlqhc162htjeevb7oc7346vm056b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

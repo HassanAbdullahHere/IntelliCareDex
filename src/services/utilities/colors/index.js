@@ -1,0 +1,18 @@
+export const colors = {
+  theme: '#4EB7D9',
+  themeSecondary: '#83c9e3',
+  statusBarLight: '#FDF9F2',
+  lightBackground: '#f5f5f5',
+  lightText: '#666666',
+  white: '#FFFFFF',
+  black: '#000000',
+  lightBlack: '#333333',
+  grey: '#D9D9D9',
+  dividerColor: '#DADADA',
+  dividerColor2: '#C7C7C7',
+  green: '#4EB7D9',
+  greyLight: '#E9E9E9',
+  errorColor: '#FF0000',
+  textRed: "#DA2828",
+  placeholderColor: '#cccccc',
+}
