@@ -61,7 +61,7 @@ const DrawerScreen = ({ navigation }) => {
                 </View>
                 
                 <TouchableOpacity onPress={() => LogOutUser()} style={{ paddingTop: hp(5) }}>
-                    <Text style={{ color: theme.color, fontSize: 16 }}>{t('Logout')}</Text>
+                    <Text style={{ color: colors.textRed, fontSize: 18, fontWeight: 800 }}>{t('Logout')}</Text>
                 </TouchableOpacity>
             </View>
         </View>

@@ -34,7 +34,7 @@ const SignupScreen = ({ navigation }) => {
         .createUserWithEmailAndPassword(email, password)
         .then(async (userCredential) => {
             // User signed up successfully
-            ShowMessage('User account created.');
+            ShowMessage('Account created Succesfully');
             const { user } = userCredential;
 
             await auth().currentUser.sendEmailVerification();
@@ -63,6 +63,7 @@ const createUserInFirestore = async (userId) => {
         await firestore().collection('User').doc(userId).set({
             name: name,
             email: email,
+            AvatarNumber: 0
         });
         console.log('User added to Firestore successfully!');
     } catch (error) {

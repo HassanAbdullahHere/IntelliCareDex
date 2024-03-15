@@ -14,6 +14,10 @@ const appIcons = {
     view: require(`${iconUrl}/view.png`),
     hide: require(`${iconUrl}/hide.png`),
     bellTab: require(`${iconUrl}/bell.png`),
+    edit: require(`${iconUrl}/edit.png`),
+    resetPassword: require(`${iconUrl}/reset-password.png`),
+    email: require(`${iconUrl}/gmail.png`),
+    verify: require(`${iconUrl}/verify.png`),
 }
 
 export { appImages, appIcons }

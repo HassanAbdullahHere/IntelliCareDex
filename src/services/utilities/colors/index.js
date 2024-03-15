@@ -10,7 +10,7 @@ export const colors = {
   grey: '#D9D9D9',
   dividerColor: '#DADADA',
   dividerColor2: '#C7C7C7',
-  green: '#4EB7D9',
+  green: 'green',
   greyLight: '#E9E9E9',
   errorColor: '#FF0000',
   textRed: "#DA2828",

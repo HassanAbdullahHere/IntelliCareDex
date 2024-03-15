@@ -5,12 +5,14 @@ const theme = {
         theme: 'light',
         color: colors.black,
         background: colors.themeSecondary,
+        notbackground: colors.theme
 
     },
     dark: {
         theme: 'dark',
         color: colors.white,
         background: colors.black,
+        notbackground: colors.themeSecondary
     },
 }
 
