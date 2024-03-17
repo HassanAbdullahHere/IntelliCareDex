@@ -30,7 +30,7 @@ const Splash = ({ navigation }) => {
       <View style={styles.wrapper}>
       <Image
           source={require('../../../assets/Images/logo.png')}
-          style={{ width: 200, height: 200, resizeMode: 'contain' }}
+          style={{ width: 250, height: 250, resizeMode: 'contain' }}
         />
       </View>
     </View>

@@ -86,7 +86,7 @@ const createUserInFirestore = async (userId) => {
     <ImageBackground source={require('../../../assets/Images/bg.png')} resizeMode="cover" style={styles.backgroundImage}>
       <StatusBar translucent backgroundColor="transparent" barStyle={theme.theme === 'dark' ? 'light-content' : 'dark-content'} />
       <View style={styles.container}>
-        <Header title={'Signup'} />
+       
         <View style={[styles.wrapper]}>
           <View style={styles.card}>
             <Image source={require('../../../assets/Images/logo.png')} style={styles.logo} />

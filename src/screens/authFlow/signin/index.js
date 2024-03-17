@@ -72,7 +72,7 @@ const LoginScreen = ({ navigation }) => {
     <ImageBackground source={require('../../../assets/Images/bg.png')} resizeMode={"cover"} style={{ flex: 1 }}>
       <StatusBar translucent backgroundColor="transparent" barStyle={theme.theme === 'dark' ? 'light-content' : 'dark-content'} />
       <View style={styles.container}>
-        <Header title={'Login'} />
+
         <View style={[styles.wrapper]}>
           <View style={styles.card}>
             <Image source={require('../../../assets/Images/logo.png')} style={styles.logo} />
@@ -100,7 +100,7 @@ const LoginScreen = ({ navigation }) => {
               </TouchableOpacity>
             </View>
             <TouchableOpacity onPress={resetPassword} style={styles.resetPasswordButton}>
-              <Text style={styles.resetPasswordText}>{t('Reset Password')}</Text>
+              <Text style={styles.resetPasswordText}>{t('Forgot Password?')}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => authenticateUser()} style={[styles.button, { backgroundColor: colors.theme }]}>
               <Text style={styles.buttonText}>{t('Login')}</Text>

@@ -4,7 +4,7 @@ const theme = {
     light: {
         theme: 'light',
         color: colors.black,
-        background: colors.themeSecondary,
+        background: colors.white,
         notbackground: colors.theme
 
     },

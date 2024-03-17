@@ -18,6 +18,10 @@ const appIcons = {
     resetPassword: require(`${iconUrl}/reset-password.png`),
     email: require(`${iconUrl}/gmail.png`),
     verify: require(`${iconUrl}/verify.png`),
+    log_out: require(`${iconUrl}/log-out.png`),
+    avatar: require(`${iconUrl}/man.png`),
+    alert: require(`${iconUrl}/alert.png`),
+    empty: require(`${iconUrl}/empty.png`),
 }
 
 export { appImages, appIcons }

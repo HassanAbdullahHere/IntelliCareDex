@@ -12,7 +12,7 @@ const Header = props => {
 
     return (
         <View style={{ backgroundColor: 'red' }}>
-            <View style={[styles.container, shadow && styles.shadow, { backgroundColor: theme.background }]}>
+            <View style={[styles.container, shadow && styles.shadow, { backgroundColor: colors.theme }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', }}>
                         <TouchableOpacity onPress={onPress}>
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     container: {
         backgroundColor: colors.white,
         padding: 10,
-        height: 60,
+        height: 45,
         width: wp(100),
         justifyContent: 'flex-end',
         paddingHorizontal: wp(5),
@@ -83,6 +83,8 @@ const styles = StyleSheet.create({
     },
     textStyle: {
         fontSize: 20,
+        fontWeight:600,
+        
         color: colors.black,
         fontFamily: fontFamily.appTextSemiBold
     },

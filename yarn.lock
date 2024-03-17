@@ -2179,6 +2179,11 @@
   resolved "https://registry.npmjs.org/@react-native-firebase/firestore/-/firestore-19.0.1.tgz"
   integrity sha512-e/lI2onUuFM5zFVMzEt4e4FFbok/CgACD8jiwPZamtRRDXOaL6xnFeJY4CWvREEp5c8rRDGc4O5OsOU9Gpi/7A==
 
+"@react-native-picker/picker@^2.6.1":
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/@react-native-picker/picker/-/picker-2.6.1.tgz#3b20ddd1385fab0487db103dc6519570f8892e6d"
+  integrity sha512-oJftvmLOj6Y6/bF4kPcK6L83yNBALGmqNYugf94BzP0FQGpHBwimVN2ygqkQ2Sn2ZU3pGUZMs0jV6+Gku2GyYg==
+
 "@react-native/assets-registry@0.73.1":
   version "0.73.1"
   resolved "https://registry.npmjs.org/@react-native/assets-registry/-/assets-registry-0.73.1.tgz"

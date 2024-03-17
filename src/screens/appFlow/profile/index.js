@@ -143,7 +143,8 @@ const Profile = ({ navigation }) => {
                     style={{ width: 30, height: 30, position: 'absolute', top:45 , right: 115 }}
                 />
                 {/* Change Avatar button */}
-                <TouchableOpacity style={{ position:"absolute",right:10,top:25,backgroundColor: colors.white, paddingHorizontal: 15, paddingVertical: 10, borderRadius: 5, marginTop: 20, alignSelf: 'center' }} onPress={() => setIsAvatarModalVisible(true)}>
+                <TouchableOpacity style={{ flexDirection:"column",alignItems:'center',position:"absolute",right:15,top:25,backgroundColor: colors.greyLight, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10, marginTop: 10, alignSelf: 'center' }} onPress={() => setIsAvatarModalVisible(true)}>
+                <Image source={appIcons.avatar} style={{ width: 20, height: 20, marginRight: 10 }} />
                     <Text style={{ color: colors.black, fontSize: 8, fontWeight: 'bold', marginRight: 5 }}>Change Avatar</Text>
                 </TouchableOpacity>
                 {/* Name */}
@@ -154,16 +155,17 @@ const Profile = ({ navigation }) => {
                         <Image source={appIcons.email} style={{ width: 20, height: 20, marginRight: 10 }} />
                         <Text style={{ fontSize: 15, color: colors.black }}>{userEmail}</Text>
                     </View>
+                    {/* Reset Password */}
+                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, backgroundColor: theme.notbackground,alignSelf:"center",borderRadius:10, paddingVertical: 10, paddingHorizontal: 20 }} onPress={handleResetPassword}>
+                        <Image source={appIcons.resetPassword} style={{ width: 20, height: 20, marginRight: 10 }} />
+                        <Text style={{ fontSize: 15, color: colors.black}}>Change Password</Text>
+                    </TouchableOpacity>
                     {/* Change Name */}
                     <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, alignSelf: "center", borderRadius: 10, backgroundColor: theme.notbackground, paddingVertical: 10, paddingHorizontal: 20 }} onPress={() => setIsModalVisible(true)}>
                         <Image source={appIcons.edit} style={{ width: 20, height: 20, marginRight: 10 }} />
                         <Text style={{ fontSize: 15, color: colors.black }}>Change Name</Text>
                     </TouchableOpacity>
-                    {/* Reset Password */}
-                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, backgroundColor: theme.notbackground,alignSelf:"center",borderRadius:10, paddingVertical: 10, paddingHorizontal: 20 }} onPress={handleResetPassword}>
-                        <Image source={appIcons.resetPassword} style={{ width: 20, height: 20, marginRight: 10 }} />
-                        <Text style={{ fontSize: 15, color: colors.black}}>Reset Password</Text>
-                    </TouchableOpacity>
+                    
                     {/* Dark Mode */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, backgroundColor: theme.notbackground,alignSelf:"center",borderRadius:30, paddingVertical: 10, paddingHorizontal: 20 }}>
                         <Text style={{ fontSize: 15, color: colors.black, marginRight:15 }}>Dark Mode</Text>
@@ -179,7 +181,8 @@ const Profile = ({ navigation }) => {
                         />
                     </View>
                     {/* Logout Button */}
-                    <TouchableOpacity style={{ backgroundColor: colors.white, paddingHorizontal: 15, paddingVertical: 10, borderRadius: 5, marginTop: 20, alignSelf: 'center' }} onPress={() => LogOutUser()}>
+                    <TouchableOpacity style={{ flexDirection: "row",alignItems:'center', backgroundColor: colors.greyLight, paddingHorizontal: 15, paddingVertical: 10, borderRadius: 5, marginTop: 20, alignSelf: 'center' }} onPress={() => LogOutUser()}>
+                    <Image source={appIcons.log_out} style={{ width: 30, height: 30, marginRight: 10 }} />
                         <Text style={{ color: 'red', fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>{t('Logout')}</Text>
                     </TouchableOpacity>
 
@@ -206,7 +209,7 @@ const Profile = ({ navigation }) => {
 
                     <Modal visible={isAvatarModalVisible} animationType="slide" transparent={true}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                    <View style={{ backgroundColor: colors.white, padding: 20, borderRadius: 10, width: '80%', maxHeight: '80%' }}>
+                    <View style={{ backgroundColor: colors.themeSecondary, padding: 20, borderRadius: 10, width: '80%', maxHeight: '80%' }}>
                         <Text style={{ fontSize: 20, marginBottom: 10, fontWeight: 900,color: colors.black }}>Change Avatar</Text>
                         {/* Avatar list */}
                         <ScrollView>
