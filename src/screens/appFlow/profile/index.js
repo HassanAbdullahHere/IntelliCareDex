@@ -5,7 +5,7 @@ import { DrawerActions } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
-import { userSave } from '../../../redux/Slices/splashSlice';
+import { userSave, setDevice } from '../../../redux/Slices/splashSlice';
 import { useDispatch } from 'react-redux';
 import { EventRegister } from 'react-native-event-listeners';
 import ToggleSwitch from 'toggle-switch-react-native';
@@ -96,6 +96,7 @@ const Profile = ({ navigation }) => {
 
     const handleLogout = () => {
         dispatch(userSave(null))
+        
         navigation.replace(routes.auth)
     }
 

@@ -12,6 +12,7 @@ export const AuthNavigation = () => {
             <AuthStack.Screen name={routes.splash} component={Auth.Splash} />
             <AuthStack.Screen name={routes.welcome} component={Auth.Welcome} />
             <AuthStack.Screen name={routes.login} component={Auth.Signin} />
+            <AuthStack.Screen name={routes.deviceConfig} component={Auth.DeviceConfig} />
             <AuthStack.Screen name={routes.signup} component={Auth.Signup} />
         </AuthStack.Navigator>
     )

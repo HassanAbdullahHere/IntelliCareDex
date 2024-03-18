@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    userID: null, 
+    userID: null,
+    deviceConfigCompleted: false, 
     value: null,
 };
 
@@ -15,9 +16,12 @@ export const splashSlice = createSlice({
         saveUserID: (state, action) => {
             state.userID = action.payload;
         },
+        setDevice: (state, action) => {
+            state.deviceConfigCompleted = action.payload;
+        },
     },
 });
 
-export const { userSave, saveUserID } = splashSlice.actions;
+export const { userSave, saveUserID, setDevice } = splashSlice.actions;
 
 export default splashSlice.reducer;

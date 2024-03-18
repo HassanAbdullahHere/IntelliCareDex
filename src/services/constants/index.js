@@ -19,6 +19,7 @@ export const routes = {
     alert: 'alert',
     profile: 'profile',
     welcome: 'welcome',
+    deviceConfig: 'deviceConfig'
 }
 
 export const loaderStyles = {

@@ -22,6 +22,7 @@ const appIcons = {
     avatar: require(`${iconUrl}/man.png`),
     alert: require(`${iconUrl}/alert.png`),
     empty: require(`${iconUrl}/empty.png`),
+    raspberry: require(`${iconUrl}/raspberry-pi.png`),
 }
 
 export { appImages, appIcons }

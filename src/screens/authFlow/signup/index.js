@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, StatusBar, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
+import { View, Text, StatusBar, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground, ActivityIndicator } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { colors } from '../../../services';
@@ -23,6 +23,7 @@ const SignupScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail]= useState('');
+  const [loading, setLoading] = useState(false);
 
   const createUser = () => {
     if (!name || !email || !password) {
@@ -30,6 +31,7 @@ const SignupScreen = ({ navigation }) => {
         return;
     }
 
+    setLoading(true);
     auth()
         .createUserWithEmailAndPassword(email, password)
         .then(async (userCredential) => {
@@ -54,6 +56,7 @@ const SignupScreen = ({ navigation }) => {
             } else {
                 ShowMessage(String(error.message));
             }
+            setLoading(false);
         });
 };
 
@@ -77,7 +80,7 @@ const createUserInFirestore = async (userId) => {
   };
 
   const onPressSignup = () => {
-    dispatch(userSave(true)); 
+    
     navigation.replace(routes.drawer);
     
   };
@@ -124,7 +127,12 @@ const createUserInFirestore = async (userId) => {
               </TouchableOpacity>
             </View>
             <TouchableOpacity onPress={() => createUser()} style={[styles.button, { backgroundColor: colors.theme }]}>
-              <Text style={styles.buttonText}>{t('Signup')}</Text>
+            {loading ? (
+                <ActivityIndicator color={colors.white} />
+              ) : (
+                <Text style={styles.buttonText}>{t('Signup')}</Text>
+              )}
+              
             </TouchableOpacity>
             <View style={styles.BottomText}>
               <Text style={[styles.text, { color: colors.lightBlack}]}>{t('Already have an account?')}</Text>

@@ -1,49 +1,98 @@
-import React, { useContext, useState } from 'react';
-import { View, Text, StatusBar, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground } from 'react-native';
-import { useDispatch } from 'react-redux';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
+import { View, Text, StatusBar, TextInput, TouchableOpacity, Image, StyleSheet, ImageBackground, ActivityIndicator } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { colors } from '../../../services';
 import { styles } from './styles';
 import { appIcons } from '../../../services'
 import auth from '@react-native-firebase/auth';
 import ShowMessage from '../../../components/toasts/index';
+import firestore from '@react-native-firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native'; 
 
 import { routes } from '../../../services';
 import { Header } from '../../../components';
-import { userSave } from '../../../redux/Slices/splashSlice';
+import { userSave, saveUserID, setDevice } from '../../../redux/Slices/splashSlice';
 import themeContext from '../../../services/config/themeContext';
 import theme from '../../../services/config/theme';
 
-
 const LoginScreen = ({ navigation }) => {
   const theme = useContext(themeContext);
-  const dispatch = useDispatch();
-  const { t } = useTranslation();
-
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [deviceConfigCompleted, setDeviceConfigCompleted] = useState(null);
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (deviceConfigCompleted !== null) {
+      onPressSignup()
+    }
+  }, [deviceConfigCompleted]);
+  
+
+  const checkDeviceConfigStatus = async () => {
+    try {
+      const userQuerySnapshot = await firestore()
+        .collection('User')
+        .where('email', '==', email)
+        .limit(1)
+        .get();
+        
+      if (!userQuerySnapshot.empty) {
+        const userData = userQuerySnapshot.docs[0].data();
+        console.log("User data:", userData);
+        console.log("DeviceID:", userData.DeviceID);
+  
+        if (userData.DeviceID !== undefined) {
+          setDeviceConfigCompleted(true);
+          console.log("State set to true");
+        } else {
+          setDeviceConfigCompleted(false);
+          console.log("State set to false");
+        }
+      } else {
+        setDeviceConfigCompleted(false);
+        console.log("No user found with the provided email");
+      }
+    } catch (error) {
+      console.error('Error checking device configuration status:', error);
+      setDeviceConfigCompleted(false);
+      console.log("Error occurred while checking device configuration");
+    }
+  };
+  
+  
+  
 
   const authenticateUser = async () => {
     if (!email || !password) {
       ShowMessage("Please enter email and password properly");
       return;
     }
-
-    const user = await auth()
-      .signInWithEmailAndPassword(email, password)
-      .then((data) => {
-        if (data.user.emailVerified) {
-          ShowMessage("Logged in Successfully")
-          onPressLogin()
-        } else {
-          ShowMessage("Verify Your Email First")
-        }
-      })
-      .catch(error => {
-        ShowMessage(error.message);
-      });
-  }
+    setLoading(true);
+  
+    try {
+      const { user } = await auth().signInWithEmailAndPassword(email, password);
+      if (user.emailVerified) {
+        await checkDeviceConfigStatus(); 
+        console.log("State: ",deviceConfigCompleted)
+        // Introduce a 2-second delay
+        // setTimeout(() => {
+        //   onPressSignup();
+        // }, 2000);
+      } else {
+        ShowMessage("Verify Your Email First");
+      }
+    } catch (error) {
+      ShowMessage(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  
 
   const resetPassword = async () => {
     if (!email) {
@@ -63,10 +112,19 @@ const LoginScreen = ({ navigation }) => {
     setShowPassword(!showPassword);
   };
 
-  const onPressLogin = () => {
-    dispatch(userSave(true));
-    navigation.replace(routes.drawer);
+  const onPressSignup = () => {
+    console.log("onPressSignup called");
+    if (deviceConfigCompleted) {
+      console.log("Navigating to drawer");
+      navigation.replace(routes.drawer);
+      ShowMessage("Logged in Successfully");
+    } else {
+      console.log("Navigating to deviceConfig");
+      navigation.navigate(routes.deviceConfig);
+    }
   };
+  
+  
 
   return (
     <ImageBackground source={require('../../../assets/Images/bg.png')} resizeMode={"cover"} style={{ flex: 1 }}>
@@ -76,7 +134,7 @@ const LoginScreen = ({ navigation }) => {
         <View style={[styles.wrapper]}>
           <View style={styles.card}>
             <Image source={require('../../../assets/Images/logo.png')} style={styles.logo} />
-            <Text style={{ color: colors.lightBlack, fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>{t('Welcome back!')}</Text>
+            <Text style={{ color: colors.lightBlack, fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>Welcome back!</Text>
             <TextInput
               style={[styles.input, { borderColor: colors.black, color: colors.black }]}
               placeholder={t('Email')}
@@ -103,7 +161,11 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.resetPasswordText}>{t('Forgot Password?')}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => authenticateUser()} style={[styles.button, { backgroundColor: colors.theme }]}>
-              <Text style={styles.buttonText}>{t('Login')}</Text>
+              {loading ? (
+                <ActivityIndicator color={colors.white} />
+              ) : (
+                <Text style={styles.buttonText}>{t('Login')}</Text>
+              )}
             </TouchableOpacity>
             <View style={styles.BottomText}>
               <Text style={[styles.text, { color: colors.lightBlack }]}>{t('Don\'t have an account?')}</Text>
