@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, FlatList, StatusBar, Image } from 'react-native';
+import { View, Text, FlatList, StatusBar, Image, TouchableOpacity } from 'react-native';
 import { DrawerActions } from '@react-navigation/native';
 import { Header } from '../../../components';
 import { styles } from './styles';
@@ -34,7 +34,7 @@ const NotificationScreen = ({ navigation }) => {
     }, {});
 
     const renderNotificationCard = ({ item }) => (
-        <View style={{ marginVertical: 11, paddingHorizontal: 20, paddingVertical: 15, backgroundColor: theme.background, borderRadius: 10, shadowColor: theme.color, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5, borderColor: theme.color, borderWidth: 1 }}>
+        <TouchableOpacity style={{ marginVertical: 11, paddingHorizontal: 20, paddingVertical: 15, backgroundColor: theme.background, borderRadius: 10, shadowColor: theme.color, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5, borderColor: theme.color, borderWidth: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {/* Icon */}
                 <Image source={appIcons.alert} style={{ width: 30, height: 30, marginRight: 15 }} />
@@ -48,7 +48,7 @@ const NotificationScreen = ({ navigation }) => {
                 {/* Time */}
                 <Text style={{ fontSize: 11, color: theme.color}}>{` ${item.time}`}</Text>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 
     const renderNotificationsForDay = ({ item }) => {

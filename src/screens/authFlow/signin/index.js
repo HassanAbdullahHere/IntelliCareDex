@@ -22,6 +22,7 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const [deviceConfigCompleted, setDeviceConfigCompleted] = useState(null);
   const { t } = useTranslation();
 
@@ -117,6 +118,7 @@ const LoginScreen = ({ navigation }) => {
     if (deviceConfigCompleted) {
       console.log("Navigating to drawer");
       navigation.replace(routes.drawer);
+      dispatch(userSave(true)); 
       ShowMessage("Logged in Successfully");
     } else {
       console.log("Navigating to deviceConfig");
