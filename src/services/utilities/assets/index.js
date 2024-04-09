@@ -24,6 +24,9 @@ const appIcons = {
     empty: require(`${iconUrl}/empty.png`),
     raspberry: require(`${iconUrl}/raspberry-pi.png`),
     addCamera: require(`${iconUrl}/video.png`),
+    cctv: require(`${iconUrl}/cctv.png`),
+    download: require(`${iconUrl}/download.png`),
+    delete: require(`${iconUrl}/bin.png`),
 }
 
 export { appImages, appIcons }

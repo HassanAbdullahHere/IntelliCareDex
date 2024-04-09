@@ -7,7 +7,7 @@ var Spinner = require('react-native-spinkit');
 
 export const Loader = props => {
     return (
-        props.loading ?
+        
             <View style={styles.container}>
                 <Spinner
                     style={styles.spinerStyle}
@@ -17,8 +17,8 @@ export const Loader = props => {
                     color={colors.theme}
                 />
             </View>
-            :
-            <View></View>
+            
+
     );
 };
 

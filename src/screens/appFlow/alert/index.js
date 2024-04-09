@@ -7,6 +7,7 @@ import themeContext from '../../../services/config/themeContext';
 import { appIcons } from '../../../services';
 import { colors } from '../../../services/utilities/colors/index';
 import { Picker } from '@react-native-picker/picker';
+import { AlertDetailScreen } from '../index';
 
 const notifications = [
     { date: '2024-02-15', day: 'Tuesday', time: '15:45', cameraName: 'Camera 2', detectionType: 'Anomaly detected' },
@@ -19,10 +20,19 @@ const notifications = [
     { date: '2024-05-15', day: 'Friday', time: '15:45', cameraName: 'Camera 2', detectionType: 'Anomaly detected' },
 ];
 
+
+
+
 const NotificationScreen = ({ navigation }) => {
     const theme = useContext(themeContext);
     const [filter, setFilter] = useState('All');
 
+    const handleNotificationPress = (item) => {
+        navigation.navigate('alertDetails', {
+            notification: item
+        });
+        console.log(item)
+    };
     const groupedNotifications = notifications.reduce((acc, notification) => {
         const { date, day, ...rest } = notification;
         if (!acc[date]) {
@@ -34,7 +44,8 @@ const NotificationScreen = ({ navigation }) => {
     }, {});
 
     const renderNotificationCard = ({ item }) => (
-        <TouchableOpacity style={{ marginVertical: 11, paddingHorizontal: 20, paddingVertical: 15, backgroundColor: theme.background, borderRadius: 10, shadowColor: theme.color, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5, borderColor: theme.color, borderWidth: 1 }}>
+        <TouchableOpacity  onPress={() => handleNotificationPress(item)}
+          style={{ marginVertical: 11, paddingHorizontal: 20, paddingVertical: 15, backgroundColor: theme.background, borderRadius: 10, shadowColor: theme.color, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5, borderColor: theme.color, borderWidth: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {/* Icon */}
                 <Image source={appIcons.alert} style={{ width: 30, height: 30, marginRight: 15 }} />

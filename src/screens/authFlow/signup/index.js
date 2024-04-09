@@ -66,7 +66,8 @@ const createUserInFirestore = async (userId) => {
         await firestore().collection('User').doc(userId).set({
             name: name,
             email: email,
-            AvatarNumber: 0
+            AvatarNumber: 0,
+            DeviceIP:""
         });
         console.log('User added to Firestore successfully!');
     } catch (error) {

@@ -19,7 +19,11 @@ export const routes = {
     alert: 'alert',
     profile: 'profile',
     welcome: 'welcome',
-    deviceConfig: 'deviceConfig'
+    deviceConfig: 'deviceConfig',
+    addCamera: 'addCamera',
+    alertDetails: 'alertDetails',
+    cameraDetails: 'cameraDetails'
+
 }
 
 export const loaderStyles = {

@@ -9,6 +9,7 @@ export class AlertStack extends Component {
         return (
             <MyStack.Navigator initialRouteName={routes.alert} screenOptions={{ headerShown: false }}>
                 <MyStack.Screen name={routes.alert} component={App.Alert} />
+                <MyStack.Screen name={routes.alertDetails} component={App.AlertDetailScreen} />
             </MyStack.Navigator>
         )
     }

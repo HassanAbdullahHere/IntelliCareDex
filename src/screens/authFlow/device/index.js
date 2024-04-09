@@ -8,12 +8,15 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import ShowMessage from '../../../components/toasts/index';
 import { Loader } from '../../../components/index';
+import axios from 'axios';
 
 import { routes } from '../../../services';
 import { Header } from '../../../components';
 import { userSave,setDevice } from '../../../redux/Slices/splashSlice';
 import themeContext from '../../../services/config/themeContext';
 import theme from '../../../services/config/theme';
+import { get } from '../../../../node_modules/react-native/Libraries/TurboModule/TurboModuleRegistry';
+import { fetchData } from '../../../network/NetworkManger';
 
 const DeviceConfig = ({ navigation }) => {
   const theme = useContext(themeContext);
@@ -21,7 +24,8 @@ const DeviceConfig = ({ navigation }) => {
   const { t } = useTranslation();
   const userId = useSelector(state => state.splash.userID);
 
-  const [deviceID, setDeviceID] = useState('');
+  const [cloudServerIP, setCloudServerIP] = useState('');
+  const [deviceIP, setDeviceIP] = useState('');
   const [devicePassword, setDevicePassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,31 +38,87 @@ const DeviceConfig = ({ navigation }) => {
     setShowPassword(!showPassword);
   };
 
-  const verifyAndContinue = async () => {
+  const verifyAndContinue = () => {
     setLoading(true);
 
-    try {
-      const userSnapshot = await firestore().collection('User').where('DeviceID', '==', deviceID).get();
-      
-      if (!userSnapshot.empty) {
-        ShowMessage('Device already registered');
-      } else {
-        
-        await firestore().collection('User').doc(userId).update({ DeviceID: deviceID });
-        ShowMessage('Device verified.');
-        dispatch(setDevice(true));
-        dispatch(userSave(true)); 
-        
-        navigation.replace(routes.drawer);
+    // Validate IP format
+    const ipRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+    const ipPortRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}$/;
 
-      }
-    } catch (error) {
-      ShowMessage('Error verifying device: ' + error.message);
-    } finally {
-      setLoading(false);
+    if (!ipPortRegex.test(cloudServerIP) || !ipRegex.test(deviceIP)) {
+        setLoading(false);
+        ShowMessage('Invalid IP format.');
+        return;
     }
-  };
 
+    // Check if there are any users in Firestore
+    firestore().collection('User').get()
+        .then(snapshot => {
+            if (snapshot.empty) {
+                // No users exist, proceed directly with the request
+                return sendRequest();
+            } else {
+                // Users exist, further check if the device IP already exists
+                return firestore().collection('User').where('DeviceIP', '==', deviceIP).get()
+                    .then(deviceSnapshot => {
+                        if (!deviceSnapshot.empty) {
+                            // Device IP already in use
+                            setLoading(false);
+                            ShowMessage('Device IP already in use.');
+                        } else {
+                            // Device IP not in use, proceed with verification
+                            return sendRequest();
+                        }
+                    });
+            }
+        })
+        .catch(error => {
+            ShowMessage('Error checking users: ' + error.message);
+            setLoading(false);
+        });
+};
+
+const sendRequest = () => {
+    // Proceed with verification
+    fetch(`https://5683-182-178-133-244.ngrok-free.app/check_raspberry_pi_ip`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            raspberry_pi_ip: deviceIP,
+            user_id: userId,
+        }),
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to check Raspberry Pi IP.');
+            }
+            return response.json();
+        })
+        .then(json => {
+            if (json.status === 'success') {
+                // Raspberry Pi IP is available, proceed to save both IPs
+                firestore().collection('User').doc(userId).update({
+                    DeviceIP: deviceIP,
+                });
+                ShowMessage('Device verified.');
+                dispatch(setDevice(true));
+                dispatch(userSave(true));
+                navigation.replace(routes.drawer);
+            } else {
+                ShowMessage('Raspberry Pi IP did not match.');
+            }
+        })
+        .catch(error => {
+            ShowMessage('Error verifying device: ' + error.message);
+        })
+        .finally(() => {
+            setLoading(false);
+        });
+};
+
+  
   return (
     <ImageBackground source={require('../../../assets/Images/bg.png')} resizeMode="cover" style={{ flex: 1 }}>
       <StatusBar translucent backgroundColor="transparent" barStyle={theme.theme === 'dark' ? 'light-content' : 'dark-content'} />
@@ -67,27 +127,22 @@ const DeviceConfig = ({ navigation }) => {
           <View style={styles.card}>
             {renderRaspberryPiIcon()}
             <Text style={styles.heading}>{t('Add your Device')}</Text>
-            <Text style={styles.note}>{t('Enter the Device ID and password of your Raspberry Pi Device ')}</Text>
+            <Text style={styles.note}>{t('Enter the Device IP and password of your Raspberry Pi Device ')}</Text>
             <TextInput
               style={styles.input}
-              placeholder={t('Device ID')}
+              placeholder={t('Cloud Server IP:Port')}
               placeholderTextColor={colors.lightBlack}
-              value={deviceID}
-              onChangeText={setDeviceID}
+              value={cloudServerIP}
+              onChangeText={setCloudServerIP}
             />
-            <View style={styles.passwordInput}>
-              <TextInput
-                style={[styles.input, { flex: 1 }]}
-                placeholder={t('Password')}
-                placeholderTextColor={colors.lightBlack}
-                secureTextEntry={!showPassword}
-                value={devicePassword}
-                onChangeText={setDevicePassword}
-              />
-              <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-                <Image source={showPassword ? appIcons.view : appIcons.hide} style={styles.eyeIconImage} />
-              </TouchableOpacity>
-            </View>
+            <TextInput
+              style={styles.input}
+              placeholder={t('Device IP')}
+              placeholderTextColor={colors.lightBlack}
+              value={deviceIP}
+              onChangeText={setDeviceIP}
+            />
+            
             <TouchableOpacity onPress={verifyAndContinue} style={[styles.button, { backgroundColor: colors.theme }]}>
               {loading ? (
                 <ActivityIndicator color={colors.white} />

@@ -44,9 +44,9 @@ const LoginScreen = ({ navigation }) => {
       if (!userQuerySnapshot.empty) {
         const userData = userQuerySnapshot.docs[0].data();
         console.log("User data:", userData);
-        console.log("DeviceID:", userData.DeviceID);
+        console.log("DeviceIP:", userData.DeviceIP);
   
-        if (userData.DeviceID !== undefined) {
+        if (userData.DeviceIP !== "") {
           setDeviceConfigCompleted(true);
           console.log("State set to true");
         } else {
@@ -79,6 +79,7 @@ const LoginScreen = ({ navigation }) => {
       if (user.emailVerified) {
         await checkDeviceConfigStatus(); 
         console.log("State: ",deviceConfigCompleted)
+        dispatch(saveUserID(user.uid));
         // Introduce a 2-second delay
         // setTimeout(() => {
         //   onPressSignup();
