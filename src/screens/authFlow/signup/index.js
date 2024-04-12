@@ -67,7 +67,8 @@ const createUserInFirestore = async (userId) => {
             name: name,
             email: email,
             AvatarNumber: 0,
-            DeviceIP:""
+            DeviceIP:"",
+            CloudServerIP:""
         });
         console.log('User added to Firestore successfully!');
     } catch (error) {

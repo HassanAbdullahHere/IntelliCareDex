@@ -69,7 +69,7 @@ const CameraDetails = ({ route, navigation }) => {
       <View style={styles.videoContainer}>
         {videoLoading && <ActivityIndicator size="large" color="gray" />}
         <Video
-          source={{ uri: 'https://vod-progressive.akamaized.net/exp=1711461555~acl=%2Fvimeo-prod-skyfire-std-us%2F01%2F4467%2F14%2F372335193%2F1547101002.mp4~hmac=7ba186474ffa748c6ea94636d5e450347c0f2a2875cefaf7cd9e16130add30b6/vimeo-prod-skyfire-std-us/01/4467/14/372335193/1547101002.mp4?filename=file.mp4' }}
+         source={{ uri: camera.streamUrl }}
           style={{ width: '100%', aspectRatio: 16/ 9 }}
           controls={true}
           resizeMode="contain"

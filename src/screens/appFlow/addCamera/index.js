@@ -36,48 +36,81 @@ const AddCamera = ({ navigation }) => {
 
   const addCamera = async () => {
     if (!validateIpAddress(ipAddress)) {
-      ShowMessage('Invalid IP Address');
-      return;
-    }
-  
-    setLoading(true);
-  
-    try {
-      const userRef = firestore().collection('User').doc(userId);
-      const userDoc = await userRef.get();
-  
-      if (!userDoc.exists) {
-        ShowMessage('User does not exist');
+        ShowMessage('Invalid IP Address');
         return;
-      }
-  
-      const userData = userDoc.data();
-      let updatedCameras = [];
-  
-      if (!userData.Cameras || !Array.isArray(userData.Cameras)) {
-        updatedCameras = [{ cameraName, ipAddress, live: true }]; 
-        await userRef.set({ Cameras: updatedCameras }, { merge: true });
-      } else {
-        const existingCameras = userData.Cameras;
-        const existingCamera = existingCameras.find(camera => camera.ipAddress === ipAddress);
-  
-        if (existingCamera) {
-          ShowMessage('IP Address already exists');
-          return;
-        }
-  
-        updatedCameras = [...existingCameras, { cameraName, ipAddress, live: true }]; 
-        await userRef.update({ Cameras: updatedCameras });
-      }
-  
-      ShowMessage('Camera added successfully');
-      navigation.navigate(routes.drawer);
-    } catch (error) {
-      ShowMessage('Error adding camera: ' + error.message);
-    } finally {
-      setLoading(false);
     }
-  };
+
+    setLoading(true);
+
+    try {
+        // Get CloudServerIP from Firestore
+        const userRef = firestore().collection('User').doc(userId);
+        const userDoc = await userRef.get();
+
+        if (!userDoc.exists) {
+            ShowMessage('User does not exist');
+            return;
+        }
+
+        const userData = userDoc.data();
+        const cloudServerIP = userData.CloudServerIP;
+
+        // Check if camera IP already exists in Firestore
+        const existingCameras = userData.Cameras || [];
+        const existingCamera = existingCameras.find(camera => camera.ipAddress === ipAddress);
+
+        if (existingCamera) {
+            ShowMessage('IP Address already exists');
+            return;
+        }
+
+        // Send request to validate camera IP and receive stream URL from server
+        const response = await fetch(`https://b72b-182-178-164-187.ngrok-free.app/validate_camera`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                camera_ip: ipAddress,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to validate camera IP');
+        }
+
+        const responseData = await response.json();
+        
+        // Check if the response is negative
+        if (responseData.status !== 'success') {
+            ShowMessage('Failed to validate camera IP');
+            return;
+        }
+
+        // Extract stream URL and camera name from the response
+        const { stream_url, camera_name } = responseData;
+
+        // Prepare updated cameras array
+        let updatedCameras = [];
+
+        if (!userData.Cameras || !Array.isArray(userData.Cameras)) {
+            updatedCameras = [{ cameraName, ipAddress, streamUrl: stream_url, live: true }]; 
+            await userRef.set({ Cameras: updatedCameras }, { merge: true });
+        } else {
+            const existingCameras = userData.Cameras;
+            updatedCameras = [...existingCameras, { cameraName, ipAddress, streamUrl: stream_url, live: true }];
+            await userRef.update({ Cameras: updatedCameras });
+        }
+
+        ShowMessage('Camera added successfully');
+        navigation.navigate(routes.drawer);
+    } catch (error) {
+        ShowMessage('Error adding camera: ' + error.message);
+    } finally {
+        setLoading(false);
+    }
+};
+
   
   
 

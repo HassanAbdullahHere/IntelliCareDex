@@ -80,7 +80,7 @@ const DeviceConfig = ({ navigation }) => {
 
 const sendRequest = () => {
     // Proceed with verification
-    fetch(`https://5683-182-178-133-244.ngrok-free.app/check_raspberry_pi_ip`, {
+    fetch(`https://b72b-182-178-164-187.ngrok-free.app/check_raspberry_pi_ip`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -101,6 +101,7 @@ const sendRequest = () => {
                 // Raspberry Pi IP is available, proceed to save both IPs
                 firestore().collection('User').doc(userId).update({
                     DeviceIP: deviceIP,
+                    CloudServerIP: cloudServerIP
                 });
                 ShowMessage('Device verified.');
                 dispatch(setDevice(true));
