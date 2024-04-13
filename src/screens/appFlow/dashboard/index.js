@@ -4,7 +4,7 @@ import { DrawerActions } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import firestore from '@react-native-firebase/firestore';
-
+import messaging from '@react-native-firebase/messaging';
 import { Loader } from '../../../components/loader/index';
 import { appIcons } from '../../../services';
 import { Header } from '../../../components';
@@ -18,6 +18,34 @@ const Dashboard = ({ navigation }) => {
   const [userName, setUserName] = useState('');
   const [cameras, setCameras] = useState([]);
   const [loading, setLoading] = useState(true); // State to manage loader visibility
+
+
+
+  
+  async function saveTokenToDatabase(token) {
+    
+    // Add the token to the users datastore
+    await firestore()
+      .collection('User')
+      .doc(userId)
+      .update({
+        token: token,
+      });
+  }
+  
+  useEffect(() => {
+    // Get the device token
+    messaging()
+      .getToken()
+      .then(token => {
+        return saveTokenToDatabase(token);
+      });
+
+    return messaging().onTokenRefresh(token => {
+      saveTokenToDatabase(token);
+      console.log("Token: ",token)
+    });
+  }, []);
 
   useEffect(() => {
     if (userId) {

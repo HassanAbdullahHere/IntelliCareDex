@@ -9,7 +9,7 @@ import { userSave, setDevice } from '../../../redux/Slices/splashSlice';
 import { useDispatch } from 'react-redux';
 import { EventRegister } from 'react-native-event-listeners';
 import ToggleSwitch from 'toggle-switch-react-native';
-
+import messaging from '@react-native-firebase/messaging';
 import { Header } from '../../../components';
 import themeContext from '../../../services/config/themeContext';
 import { useSelector } from 'react-redux'; 
@@ -105,6 +105,13 @@ const Profile = ({ navigation }) => {
         .then(() => {
             ShowMessage('User signed out!');
             handleLogout();
+            messaging().deleteToken();
+            firestore()
+            .collection('User')
+            .doc(userId)
+            .update({
+                token: "",
+            });
         });
     }
 
