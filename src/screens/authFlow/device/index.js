@@ -80,7 +80,7 @@ const DeviceConfig = ({ navigation }) => {
 
 const sendRequest = () => {
     // Proceed with verification
-    fetch(`https://b72b-182-178-164-187.ngrok-free.app/check_raspberry_pi_ip`, {
+    fetch(`https://0f5e-39-55-164-78.ngrok-free.app/check_raspberry_pi_ip`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

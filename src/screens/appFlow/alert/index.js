@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, FlatList, StatusBar, Image, TouchableOpacity } from 'react-native';
 import { DrawerActions } from '@react-navigation/native';
 import { Header } from '../../../components';
@@ -8,17 +8,9 @@ import { appIcons } from '../../../services';
 import { colors } from '../../../services/utilities/colors/index';
 import { Picker } from '@react-native-picker/picker';
 import { AlertDetailScreen } from '../index';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
-const notifications = [
-    { date: '2024-02-15', day: 'Tuesday', time: '15:45', cameraName: 'Camera 2', detectionType: 'Anomaly detected' },
-    { date: '2024-03-15', day: 'Wednesday', time: '14:30', cameraName: 'Camera 1', detectionType: 'Fall detected' },
-    { date: '2024-03-15', day: 'Wednesday', time: '15:45', cameraName: 'Camera 2', detectionType: 'Anomaly detected' },
-    { date: '2024-05-15', day: 'Friday', time: '15:45', cameraName: 'Camera 2', detectionType: 'Anomaly detected' },
-    { date: '2024-05-15', day: 'Friday', time: '18:45', cameraName: 'Camera 2', detectionType: 'Fall detected' },
-    { date: '2024-05-16', day: 'Sunday', time: '15:45', cameraName: 'Camera 3', detectionType: 'Anomaly detected' },
-    { date: '2024-05-15', day: 'Friday', time: '15:45', cameraName: 'Camera 2', detectionType: 'Anomaly detected' },
-    { date: '2024-05-15', day: 'Friday', time: '15:45', cameraName: 'Camera 2', detectionType: 'Anomaly detected' },
-];
 
 
 
@@ -26,6 +18,40 @@ const notifications = [
 const NotificationScreen = ({ navigation }) => {
     const theme = useContext(themeContext);
     const [filter, setFilter] = useState('All');
+    const [notifications, setNotifications] = useState([]);
+
+    useEffect(() => {
+        // Fetch user's alerts from Firestore
+        const fetchNotifications = async () => {
+            try {
+                const userId = auth().currentUser.uid; // Get the current user's ID
+                const userDoc = await firestore().collection('User').doc(userId).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    if (userData && userData.Alerts) {
+                        setNotifications(userData.Alerts); // Set notifications state with the alerts array
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        };
+    
+        fetchNotifications();
+    
+        // Set up a real-time listener for changes in alerts
+        const unsubscribe = firestore().collection('User').doc(auth().currentUser.uid).onSnapshot((doc) => {
+            if (doc.exists) {
+                const userData = doc.data();
+                if (userData && userData.Alerts) {
+                    setNotifications(userData.Alerts);
+                }
+            }
+        });
+    
+        // Clean up the listener when the component unmounts
+        return () => unsubscribe();
+    }, []);
 
     const handleNotificationPress = (item) => {
         navigation.navigate('alertDetails', {
@@ -109,8 +135,8 @@ const NotificationScreen = ({ navigation }) => {
                         setFilter(itemValue)
                     }>
                     <Picker.Item label="All" value="All" />
-                    <Picker.Item label="Anomaly" value="Anomaly detected" />
-                    <Picker.Item label="Fall" value="Fall detected" />
+                    <Picker.Item label="Anomaly" value="anomaly detected" />
+                    <Picker.Item label="Fall" value="fall detected" />
                 </Picker>
 
                 </View>

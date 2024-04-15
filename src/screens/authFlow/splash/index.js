@@ -17,6 +17,7 @@ const Splash = ({ navigation }) => {
   React.useEffect(() => {
     const requestPermissions = async () => {
       PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+      PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
 
       const authStatus = await messaging().requestPermission();
       const enabled =
