@@ -20,12 +20,13 @@ const AddCamera = ({ navigation }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const userId = useSelector(state => state.splash.userID);
+  const newAlert = useSelector(state => state.splash.newAlert) 
 
   const [cameraName, setCameraName] = useState('');
   const [ipAddress, setIpAddress] = useState('');
   const [loading, setLoading] = useState(false);
 
-  
+  useEffect(() => {console.log(newAlert)},[])
 
   
   const validateIpAddress = (ip) => {
@@ -65,13 +66,14 @@ const AddCamera = ({ navigation }) => {
         }
 
         // Send request to validate camera IP and receive stream URL from server
-        const response = await fetch(`https://b72b-182-178-164-187.ngrok-free.app/validate_camera`, {
+        const response = await fetch(`https://87f8-39-46-133-144.ngrok-free.app/validate_camera`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 camera_ip: ipAddress,
+                camera_name: cameraName
             }),
         });
 
@@ -103,7 +105,20 @@ const AddCamera = ({ navigation }) => {
         }
 
         ShowMessage('Camera added successfully');
-        navigation.navigate(routes.drawer);
+        navigation.navigate('dashboard');
+         // Notify server to start detection
+         await fetch(`https://87f8-39-46-133-144.ngrok-free.app/start_detection`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+              camera_ip: ipAddress,
+          }),
+          });
+
+
+        
     } catch (error) {
         ShowMessage('Error adding camera: ' + error.message);
     } finally {

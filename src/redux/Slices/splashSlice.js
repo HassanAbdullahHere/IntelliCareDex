@@ -4,6 +4,7 @@ const initialState = {
     userID: null,
     deviceConfigCompleted: false, 
     value: null,
+    newAlert: false
 };
 
 export const splashSlice = createSlice({
@@ -19,9 +20,13 @@ export const splashSlice = createSlice({
         setDevice: (state, action) => {
             state.deviceConfigCompleted = action.payload;
         },
+        setNewAlert: (state, action) => {
+            state.newAlert = action.payload;
+        },
     },
-});
+    },
+);
 
-export const { userSave, saveUserID, setDevice } = splashSlice.actions;
+export const { userSave, saveUserID, setDevice, setNewAlert } = splashSlice.actions;
 
 export default splashSlice.reducer;

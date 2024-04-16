@@ -10,15 +10,15 @@ import { Picker } from '@react-native-picker/picker';
 import { AlertDetailScreen } from '../index';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-
-
-
-
+import { useDispatch, useSelector } from 'react-redux'
+import { setNewAlert } from '../../../redux/Slices/splashSlice';
 
 const NotificationScreen = ({ navigation }) => {
     const theme = useContext(themeContext);
     const [filter, setFilter] = useState('All');
     const [notifications, setNotifications] = useState([]);
+    const dispatch = useDispatch();
+    const newAlert = useSelector(state => state.splash.newAlert);
 
     useEffect(() => {
         // Fetch user's alerts from Firestore
@@ -36,9 +36,9 @@ const NotificationScreen = ({ navigation }) => {
                 console.error('Error fetching notifications:', error);
             }
         };
-    
+
         fetchNotifications();
-    
+
         // Set up a real-time listener for changes in alerts
         const unsubscribe = firestore().collection('User').doc(auth().currentUser.uid).onSnapshot((doc) => {
             if (doc.exists) {
@@ -48,7 +48,7 @@ const NotificationScreen = ({ navigation }) => {
                 }
             }
         });
-    
+
         // Clean up the listener when the component unmounts
         return () => unsubscribe();
     }, []);
@@ -59,6 +59,8 @@ const NotificationScreen = ({ navigation }) => {
         });
         console.log(item)
     };
+
+    // Group notifications by date
     const groupedNotifications = notifications.reduce((acc, notification) => {
         const { date, day, ...rest } = notification;
         if (!acc[date]) {
@@ -70,8 +72,23 @@ const NotificationScreen = ({ navigation }) => {
     }, {});
 
     const renderNotificationCard = ({ item }) => (
-        <TouchableOpacity  onPress={() => handleNotificationPress(item)}
-          style={{ marginVertical: 11, paddingHorizontal: 20, paddingVertical: 15, backgroundColor: theme.background, borderRadius: 10, shadowColor: theme.color, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84, elevation: 5, borderColor: theme.color, borderWidth: 1 }}>
+        <TouchableOpacity
+            onPress={() => handleNotificationPress(item)}
+            style={{
+                marginVertical: 11,
+                paddingHorizontal: 20,
+                paddingVertical: 15,
+                backgroundColor: theme.background,
+                borderRadius: 10,
+                shadowColor: theme.color,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+                elevation: 5,
+                borderColor: theme.color,
+                borderWidth: 1
+            }}
+        >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {/* Icon */}
                 <Image source={appIcons.alert} style={{ width: 30, height: 30, marginRight: 15 }} />
@@ -83,15 +100,16 @@ const NotificationScreen = ({ navigation }) => {
                 </View>
 
                 {/* Time */}
-                <Text style={{ fontSize: 11, color: theme.color}}>{` ${item.time}`}</Text>
+                <Text style={{ fontSize: 11, color: theme.color }}>{` ${item.time}`}</Text>
             </View>
         </TouchableOpacity>
     );
 
     const renderNotificationsForDay = ({ item }) => {
+        // Filter notifications based on the selected filter
         const filteredNotifications = item.notifications.filter(notification => filter === 'All' || notification.detectionType === filter);
         if (filteredNotifications.length === 0) return null;
-    
+
         return (
             <View style={{ marginBottom: 15 }}>
                 <Text style={{ fontSize: 12, fontWeight: 'bold', paddingHorizontal: 7, color: theme.color }}>{`${item.day}, ${item.date}`}</Text>
@@ -107,38 +125,29 @@ const NotificationScreen = ({ navigation }) => {
         );
     };
 
-    if (notifications.length === 0) {
-        return (
-            <View style={[styles.container, { backgroundColor: theme.background }]}>
-                <StatusBar backgroundColor={theme.background} barStyle={theme.theme === 'dark' ? 'light-content' : 'dark-content'} />
-                <Header leftIcon={appIcons.drawer} onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())} title={'Notifications'} />
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Image source={appIcons.empty} style={{ width: 80, height: 80 }} />
-                    <Text style={{ fontSize: 16, paddingHorizontal: 20, color: theme.color, marginTop: 10 }}>No Notifications</Text>
-                </View>
-            </View>
-        );
-    }
+    // Clear the dot indicating new alerts when navigating to the Notification screen
+    useEffect(() => {
+        dispatch(setNewAlert(false));
+    }, []);
 
+    // Render the Notification screen
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
             <StatusBar backgroundColor={theme.background} barStyle={theme.theme === 'dark' ? 'light-content' : 'dark-content'} />
             <Header leftIcon={appIcons.drawer} onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())} title={'Notifications'} />
             <View style={{ flex: 1, paddingHorizontal: 12, paddingTop: 20 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30, borderColor: theme.color, borderWidth: 1, borderRadius: 10, width:"45%" }}>
-
-                <Picker
-                    selectedValue={filter}
-                    style={{ height: 50, width: 140, color: theme.color }}
-                    itemStyle={{ fontSize: 8 }}
-                    onValueChange={(itemValue, itemIndex) =>
-                        setFilter(itemValue)
-                    }>
-                    <Picker.Item label="All" value="All" />
-                    <Picker.Item label="Anomaly" value="anomaly detected" />
-                    <Picker.Item label="Fall" value="fall detected" />
-                </Picker>
-
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 30, borderColor: theme.color, borderWidth: 1, borderRadius: 10, width: "45%" }}>
+                    <Picker
+                        selectedValue={filter}
+                        style={{ height: 50, width: 140, color: theme.color }}
+                        itemStyle={{ fontSize: 8 }}
+                        onValueChange={(itemValue, itemIndex) =>
+                            setFilter(itemValue)
+                        }>
+                        <Picker.Item label="All" value="All" />
+                        <Picker.Item label="Anomaly" value="anomaly detected" />
+                        <Picker.Item label="Fall" value="fall detected" />
+                    </Picker>
                 </View>
                 <FlatList
                     data={Object.values(groupedNotifications)}
