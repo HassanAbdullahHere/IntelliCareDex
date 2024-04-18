@@ -130,6 +130,19 @@ const NotificationScreen = ({ navigation }) => {
         dispatch(setNewAlert(false));
     }, []);
 
+    if (notifications.length === 0) {
+        return (
+            <View style={[styles.container, { backgroundColor: theme.background }]}>
+                <StatusBar backgroundColor={theme.background} barStyle={theme.theme === 'dark' ? 'light-content' : 'dark-content'} />
+                <Header leftIcon={appIcons.drawer} onPress={() => navigation.dispatch(DrawerActions.toggleDrawer())} title={'Notifications'} />
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Image source={appIcons.empty} style={{ width: 80, height: 80 }} />
+                    <Text style={{ fontSize: 16, paddingHorizontal: 20, color: theme.color, marginTop: 10 }}>No Notifications</Text>
+                </View>
+            </View>
+        );
+    }
+
     // Render the Notification screen
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>

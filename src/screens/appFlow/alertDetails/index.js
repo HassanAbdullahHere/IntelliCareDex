@@ -35,7 +35,7 @@ const AlertDetailScreen = ({ route, navigation }) => {
         const base64Video = notification.clip;
         const { config, fs } = RNFetchBlob;
         const DownloadDir = fs.dirs.DownloadDir;
-        const localVideoPath = `${DownloadDir}/${notification.fileName}`;
+        const localVideoPath = `${DownloadDir}/${notification.key}`;
 
         RNFetchBlob.fs.writeFile(localVideoPath, base64Video, 'base64')
             .then(() => {

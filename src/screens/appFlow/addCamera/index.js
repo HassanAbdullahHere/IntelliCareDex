@@ -66,7 +66,7 @@ const AddCamera = ({ navigation }) => {
         }
 
         // Send request to validate camera IP and receive stream URL from server
-        const response = await fetch(`https://87f8-39-46-133-144.ngrok-free.app/validate_camera`, {
+        const response = await fetch(`https://d6df-103-190-23-143.ngrok-free.app/validate_camera`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ const AddCamera = ({ navigation }) => {
         ShowMessage('Camera added successfully');
         navigation.navigate('dashboard');
          // Notify server to start detection
-         await fetch(`https://87f8-39-46-133-144.ngrok-free.app/start_detection`, {
+         await fetch(`https://d6df-103-190-23-143.ngrok-free.app/start_detection`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',
