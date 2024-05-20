@@ -8,6 +8,7 @@ import ShowMessage from '../../../components/toasts/index';
 import theme from '../../../services/config/theme';
 import themeContext from '../../../services/config/themeContext';
 import { colors } from '../../../services/utilities/colors/index';
+import { SERVER_IP } from '../../../../config';
 
 const CameraDetails = ({ route, navigation }) => {
   const { camera, userId } = route.params;
@@ -41,7 +42,7 @@ const CameraDetails = ({ route, navigation }) => {
         navigation.navigate('dashboard');
 
         // Send request to server to update camera name
-        const response = await fetch(`https://d6df-103-190-23-143.ngrok-free.app/update_camera_name`, {
+        const response = await fetch(`${SERVER_IP}/update_camera_name`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -82,7 +83,7 @@ const CameraDetails = ({ route, navigation }) => {
         await userRef.update({ Cameras: updatedCameras });
 
         // Send request to server to end detection for this camera
-        const response = await fetch(`https://d6df-103-190-23-143.ngrok-free.app/end_detection`, {
+        const response = await fetch(`${SERVER_IP}/end_detection`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

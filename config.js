@@ -1,0 +1,1 @@
+export const SERVER_IP = "https://5565-182-178-135-155.ngrok-free.app"

@@ -7,6 +7,7 @@ import { appIcons } from '../../../services';
 import firestore from '@react-native-firebase/firestore';
 import ShowMessage from '../../../components/toasts/index';
 import { Loader } from '../../../components/index';
+import { SERVER_IP } from '../../../../config';
 
 import { routes } from '../../../services';
 import { Header } from '../../../components';
@@ -66,7 +67,7 @@ const AddCamera = ({ navigation }) => {
         }
 
         // Send request to validate camera IP and receive stream URL from server
-        const response = await fetch(`https://d6df-103-190-23-143.ngrok-free.app/validate_camera`, {
+        const response = await fetch(`${SERVER_IP}/validate_camera`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -107,7 +108,7 @@ const AddCamera = ({ navigation }) => {
         ShowMessage('Camera added successfully');
         navigation.navigate('dashboard');
          // Notify server to start detection
-         await fetch(`https://d6df-103-190-23-143.ngrok-free.app/start_detection`, {
+         await fetch(`${SERVER_IP}/start_detection`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',

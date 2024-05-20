@@ -17,6 +17,7 @@ import themeContext from '../../../services/config/themeContext';
 import theme from '../../../services/config/theme';
 import { get } from '../../../../node_modules/react-native/Libraries/TurboModule/TurboModuleRegistry';
 import { fetchData } from '../../../network/NetworkManger';
+import { SERVER_IP } from '../../../../config';
 
 const DeviceConfig = ({ navigation }) => {
   const theme = useContext(themeContext);
@@ -80,7 +81,7 @@ const DeviceConfig = ({ navigation }) => {
 
 const sendRequest = () => {
     // Proceed with verification
-    fetch(`https://d6df-103-190-23-143.ngrok-free.app/check_raspberry_pi_ip`, {
+    fetch(`${SERVER_IP}/check_raspberry_pi_ip`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
