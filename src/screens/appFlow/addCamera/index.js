@@ -67,7 +67,7 @@ const AddCamera = ({ navigation }) => {
         }
 
         // Send request to validate camera IP and receive stream URL from server
-        const response = await fetch(`${SERVER_IP}/validate_camera`, {
+        const response = await fetch(`http://${cloudServerIP}/validate_camera`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ const AddCamera = ({ navigation }) => {
         ShowMessage('Camera added successfully');
         navigation.navigate('dashboard');
          // Notify server to start detection
-         await fetch(`${SERVER_IP}/start_detection`, {
+         await fetch(`http://${cloudServerIP}/start_detection`, {
           method: 'POST',
           headers: {
               'Content-Type': 'application/json',

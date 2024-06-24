@@ -1,1 +1,1 @@
-export const SERVER_IP = "https://5565-182-178-135-155.ngrok-free.app"
+export const SERVER_IP = "https://db3d-39-55-162-33.ngrok-free.app"

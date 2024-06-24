@@ -81,7 +81,7 @@ const DeviceConfig = ({ navigation }) => {
 
 const sendRequest = () => {
     // Proceed with verification
-    fetch(`${SERVER_IP}/check_raspberry_pi_ip`, {
+    fetch(`http://${cloudServerIP}/check_raspberry_pi_ip`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

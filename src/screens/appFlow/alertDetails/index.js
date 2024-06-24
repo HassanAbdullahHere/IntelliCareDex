@@ -97,7 +97,7 @@ const AlertDetailScreen = ({ route, navigation }) => {
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
                     
-                    <TouchableOpacity style={{ flexDirection: 'row', paddingVertical: 10, marginLeft:85,paddingHorizontal: 20, borderRadius: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: 'red' }} onPress={handleDelete}>
+                    <TouchableOpacity style={{ flexDirection: 'row', paddingVertical: 10, marginLeft:110,paddingHorizontal: 20, borderRadius: 5, alignItems: 'center', justifyContent: 'center', backgroundColor: 'red' }} onPress={handleDelete}>
                         <Image source={appIcons.delete} style={{ width: 20, height: 20, marginRight: 10 }} />
                         <Text style={{ color: 'white', fontSize: 16 }}>Delete</Text>
                     </TouchableOpacity>

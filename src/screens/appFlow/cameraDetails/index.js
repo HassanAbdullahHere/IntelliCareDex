@@ -1,113 +1,140 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator, TextInput, Modal, TouchableWithoutFeedback } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, TextInput, Modal, TouchableWithoutFeedback } from 'react-native';
 import { Header } from '../../../components';
 import { appIcons } from '../../../services';
-import Video from 'react-native-video';
 import firestore from '@react-native-firebase/firestore';
 import ShowMessage from '../../../components/toasts/index';
-import theme from '../../../services/config/theme';
 import themeContext from '../../../services/config/themeContext';
 import { colors } from '../../../services/utilities/colors/index';
-import { SERVER_IP } from '../../../../config';
 
 const CameraDetails = ({ route, navigation }) => {
   const { camera, userId } = route.params;
   const [editing, setEditing] = useState(false);
   const theme = useContext(themeContext);
   const [newCameraName, setNewCameraName] = useState(camera.cameraName);
-  const [videoLoading, setVideoLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [frame, setFrame] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [fetchingFrames, setFetchingFrames] = useState(true);
 
-  useEffect(() => {console.log(userId)},[])
+  useEffect(() => {
+    console.log(userId);
+  }, []);
+
+  useEffect(() => {
+    let interval;
+    if (fetchingFrames) {
+      interval = setInterval(fetchFrame, 1000); // Adjust interval as needed
+    }
+    return () => clearInterval(interval);
+  }, [fetchingFrames]);
+
+  const fetchFrame = async () => {
+    try {
+      const response = await fetch('http://20.15.226.200:5000/cam3_feed');
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+
+      console.log('Response received',response)
+
+      // const blob = await response.blob();
+      // console.log('Blob created:', blob);
+
+      // const url = URL.createObjectURL(blob);
+      // console.log('Frame URL created:', url);
+      // setFrame(url);
+    } catch (error) {
+      console.error('Error fetching frame:', error);
+    }
+  };
 
   const updateCameraName = async () => {
-    // Update camera name in Firestore
     try {
-        const userRef = firestore().collection('User').doc(userId);
-        const userDoc = await userRef.get();
-        if (!userDoc.exists) {
-            console.error('User document does not exist');
-            return;
+      const userRef = firestore().collection('User').doc(userId);
+      const userDoc = await userRef.get();
+      if (!userDoc.exists) {
+        console.error('User document does not exist');
+        return;
+      }
+      const userData = userDoc.data();
+      const cloudServerIP = userData.CloudServerIP;
+      const updatedCameras = userData.Cameras.map(cam => {
+        if (cam.ipAddress === camera.ipAddress) {
+          return { ...cam, cameraName: newCameraName };
         }
-        const userData = userDoc.data();
-        const updatedCameras = userData.Cameras.map(cam => {
-            if (cam.ipAddress === camera.ipAddress) {
-                return { ...cam, cameraName: newCameraName };
-            }
-            return cam;
-        });
-        await userRef.update({ Cameras: updatedCameras });
-        setEditing(false);
-        navigation.navigate('dashboard');
+        return cam;
+      });
+      await userRef.update({ Cameras: updatedCameras });
+      setEditing(false);
+      navigation.navigate('dashboard');
 
-        // Send request to server to update camera name
-        const response = await fetch(`${SERVER_IP}/update_camera_name`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                camera_ip: camera.ipAddress,
-                camera_name: newCameraName,
-            }),
-        });
+      const response = await fetch(`http://${cloudServerIP}/update_camera_name`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          camera_ip: camera.ipAddress,
+          camera_name: newCameraName,
+        }),
+      });
 
-        if (!response.ok) {
-            throw new Error('Failed to update camera name on the server');
-        }
+      if (!response.ok) {
+        throw new Error('Failed to update camera name on the server');
+      }
 
-        const responseData = await response.json();
-        if (responseData.success !== true) {
-            throw new Error(responseData.message || 'Failed to update camera name on the server');
-        }
+      const responseData = await response.json();
+      if (responseData.success !== true) {
+        throw new Error(responseData.message || 'Failed to update camera name on the server');
+      }
 
-        console.log('Camera name updated successfully on the server');
+      console.log('Camera name updated successfully on the server');
     } catch (error) {
-        console.error('Error updating camera name:', error);
+      console.error('Error updating camera name:', error);
     }
   };
 
   const removeCamera = async () => {
     setLoading(true);
-    // Remove camera from Firestore and end detection on the server
     try {
-        const userRef = firestore().collection('User').doc(userId);
-        const userDoc = await userRef.get();
-        if (!userDoc.exists) {
-            console.error('User document does not exist');
-            return;
-        }
-        const userData = userDoc.data();
-        const updatedCameras = userData.Cameras.filter(cam => cam.ipAddress !== camera.ipAddress);
-        await userRef.update({ Cameras: updatedCameras });
+      const userRef = firestore().collection('User').doc(userId);
+      const userDoc = await userRef.get();
+      if (!userDoc.exists) {
+        console.error('User document does not exist');
+        return;
+      }
+      const userData = userDoc.data();
+      const cloudServerIP = userData.CloudServerIP;
+      const updatedCameras = userData.Cameras.filter(cam => cam.ipAddress !== camera.ipAddress);
+      await userRef.update({ Cameras: updatedCameras });
 
-        // Send request to server to end detection for this camera
-        const response = await fetch(`${SERVER_IP}/end_detection`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                camera_ip: camera.ipAddress,
-            }),
-        });
+      const response = await fetch(`http://${cloudServerIP}/end_detection`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          camera_ip: camera.ipAddress,
+        }),
+      });
 
-        if (!response.ok) {
-            throw new Error('Failed to end detection for the camera on the server');
-        }
+      if (!response.ok) {
+        throw new Error('Failed to end detection for the camera on the server');
+      }
 
-        const responseData = await response.json();
-        if (responseData.success !== true) {
-            throw new Error(responseData.message || 'Failed to end detection for the camera on the server');
-        }
+      const responseData = await response.json();
+      if (responseData.success !== true) {
+        throw new Error(responseData.message || 'Failed to end detection for the camera on the server');
+      }
 
-        console.log('Detection ended successfully for the camera on the server');
-        ShowMessage("Camera Removed Successfully")
-        navigation.navigate('dashboard');
+      console.log('Detection ended successfully for the camera on the server');
+      ShowMessage("Camera Removed Successfully");
+      navigation.navigate('dashboard');
     } catch (error) {
-        console.error('Error removing camera:', error);
-    }finally{
+      console.error('Error removing camera:', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -115,19 +142,14 @@ const CameraDetails = ({ route, navigation }) => {
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
       <Header leftIcon={appIcons.backIcon} onPress={() => navigation.goBack()} title={camera.cameraName} />
-      <View style={{ flex: 1, marginTop: 40 }}>
-        {videoLoading && <ActivityIndicator size="large" color="gray" />}
-        <Video
-         source={{ uri: "https://videos.pexels.com/video-files/19757074/19757074-sd_640_360_30fps.mp4" }}
-          style={{ width: '100%', aspectRatio: 16/ 9 }}
-          controls={false}
-          resizeMode="contain"
-          onError={(error) => console.error(error)}
-          onLoadStart={() => setVideoLoading(true)}
-          onLoad={() => setVideoLoading(false)}
-        />
+      <View style={{ flex: 1, marginTop: 40, justifyContent: 'center', alignItems: 'center' }}>
+        {frame ? (
+          <Image source={{ uri: frame }} style={{ width: '100%', aspectRatio: 16 / 9 }} resizeMode="contain" />
+        ) : (
+          <ActivityIndicator size="large" color="gray" />
+        )}
       </View>
-      <View style={{ marginBottom:70,flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'lightgray' }}>
+      <View style={{ marginBottom: 70, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: 'lightgray' }}>
         <Text style={{ fontSize: 24, fontWeight: 'bold', color: theme.color }}>{editing ? 'Edit Camera Name' : camera.cameraName}</Text>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
           <Image source={appIcons.edit} style={{ width: 20, height: 20, marginLeft: 10 }} />
@@ -142,7 +164,7 @@ const CameraDetails = ({ route, navigation }) => {
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'center', alignItems: 'center' }}>
             <View style={{ backgroundColor: colors.themeSecondary, padding: 20, borderRadius: 10, width: '80%' }}>
-              <Text style={{ color:theme.color, fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Edit Camera Name</Text>
+              <Text style={{ color: theme.color, fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Edit Camera Name</Text>
               <TextInput
                 style={{ borderWidth: 1, borderColor: 'gray', borderRadius: 5, padding: 10, marginBottom: 10 }}
                 value={newCameraName}
@@ -156,13 +178,13 @@ const CameraDetails = ({ route, navigation }) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      <TouchableOpacity onPress={removeCamera} style={{ marginBottom:140,backgroundColor: 'red', paddingVertical: 12, alignItems: 'center', marginHorizontal: 16, borderRadius: 5, marginTop: 20 }}>
-      {loading ? (
-        <ActivityIndicator size="small" color="white" /> 
-      ) : (
-        <Text style={{ fontSize: 16, color: 'white', fontWeight: 'bold' }}>Remove Camera</Text> 
-      )}
-    </TouchableOpacity>
+      <TouchableOpacity onPress={removeCamera} style={{ marginBottom: 140, backgroundColor: 'red', paddingVertical: 12, alignItems: 'center', marginHorizontal: 16, borderRadius: 5, marginTop: 20 }}>
+        {loading ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Text style={{ fontSize: 16, color: 'white', fontWeight: 'bold' }}>Remove Camera</Text>
+        )}
+      </TouchableOpacity>
     </View>
   );
 };

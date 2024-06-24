@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, Button, StatusBar, Alert, Image, TouchableOpacity, Modal ,ScrollView} from 'react-native';
+import { View, Text, TextInput, Button, StatusBar, Alert, Image, TouchableOpacity, Modal ,ScrollView, ActivityIndicator} from 'react-native';
 
 import { DrawerActions } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -15,12 +15,15 @@ import themeContext from '../../../services/config/themeContext';
 import { useSelector } from 'react-redux'; 
 import ShowMessage from '../../../components/toasts/index';
 import { colors, routes, wp, hp, appIcons } from '../../../services'; 
+import { SERVER_IP } from '../../../../config';
 
 const Profile = ({ navigation }) => {
     const theme = useContext(themeContext);
     const { t } = useTranslation();
     const dispatch = useDispatch();
     const userId = useSelector(state => state.splash.userID);
+
+    const [loading, setLoading] = useState(false);
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -31,7 +34,9 @@ const Profile = ({ navigation }) => {
 
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isAvatarModalVisible, setIsAvatarModalVisible] = useState(false);
+    const [isRemoveDeviceModalVisible, setIsRemoveDeviceModalVisible] = useState(false);
     const [newUsername, setNewUsername] = useState('');
+    const [password, setPassword] = useState('');
 
     const handleAvatarSelection = (avatarIndex) => {
         setSelectedAvatarIndex(avatarIndex);
@@ -131,6 +136,56 @@ const Profile = ({ navigation }) => {
         }
     };
 
+    const handleRemoveDevice = async () => {
+        const user = auth().currentUser;
+        if (user && password) {
+            setLoading(true); // Set loading state to true
+    
+            const credential = auth.EmailAuthProvider.credential(user.email, password);
+            user.reauthenticateWithCredential(credential)
+                .then(async () => {
+                    // Fetch cameras from Firestore
+                    const userDoc = await firestore().collection('User').doc(userId).get();
+                    const userData = userDoc.data();
+                    const cameras = userData.Cameras || [];
+    
+                    // End detection on all cameras
+                    const endDetectionRequests = cameras.map(async camera => {
+                        await fetch(`${SERVER_IP}/end_detection`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                camera_ip: camera.ipAddress,
+                            }),
+                        });
+                    });
+    
+                    await Promise.all(endDetectionRequests);
+    
+                    // Empty fields in Firestore after ending detection
+                    await firestore().collection('User').doc(userId).update({
+                        DeviceIP: '',
+                        Cameras: [],
+                        Alerts: []
+                    });
+    
+                    setLoading(false); // Set loading state to false
+                    ShowMessage('Device removed successfully!');
+                    LogOutUser();
+                })
+                .catch(error => {
+                    setLoading(false); // Set loading state to false
+                    Alert.alert('Error:', 'Invalid password. Please try again.');
+                });
+        } else {
+            Alert.alert('Error:', 'Password cannot be empty.');
+        }
+    };
+    
+    
+
     return (
         <View style={{ flex: 1, backgroundColor: colors.theme }}>
             {/* Green view taking 20% of the screen */}
@@ -154,6 +209,11 @@ const Profile = ({ navigation }) => {
                 <TouchableOpacity style={{ flexDirection:"column",alignItems:'center',position:"absolute",right:15,top:25,backgroundColor: colors.greyLight, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10, marginTop: 10, alignSelf: 'center' }} onPress={() => setIsAvatarModalVisible(true)}>
                 <Image source={appIcons.avatar} style={{ width: 20, height: 20, marginRight: 10 }} />
                     <Text style={{ color: colors.black, fontSize: 8, fontWeight: 'bold', marginRight: 5 }}>Change Avatar</Text>
+                </TouchableOpacity>
+                {/* Remove Device button */}
+                <TouchableOpacity style={{ flexDirection:"column",alignItems:'center',position:"absolute",left:15,top:25,backgroundColor: colors.greyLight, paddingHorizontal: 10, paddingVertical: 8, borderRadius: 10, marginTop: 10, alignSelf: 'center' }} onPress={() => setIsRemoveDeviceModalVisible(true)}>
+                <Image source={appIcons.raspberry} style={{ width: 20, height: 20, marginRight: 10 }} />
+                    <Text style={{ color: colors.black, fontSize: 8, fontWeight: 'bold', marginRight: 5 }}>Remove Device</Text>
                 </TouchableOpacity>
                 {/* Name */}
                 <Text style={{ fontSize: 24, marginTop: 20, color: theme.color }}>{name}</Text>
@@ -215,40 +275,80 @@ const Profile = ({ navigation }) => {
                         </View>
                     </Modal>
 
+                    {/* Modal for changing avatar */}
                     <Modal visible={isAvatarModalVisible} animationType="slide" transparent={true}>
-                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-                    <View style={{ backgroundColor: colors.themeSecondary, padding: 20, borderRadius: 10, width: '80%', maxHeight: '80%' }}>
-                        <Text style={{ fontSize: 20, marginBottom: 10, fontWeight: 900,color: colors.black }}>Change Avatar</Text>
-                        {/* Avatar list */}
-                        <ScrollView>
-                            {avatarImages.map((avatar, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
-                                    onPress={() => handleAvatarSelection(index)}
-                                >
-                                    <Image
-                                        source={avatar.imagePath}
-                                        style={{ width: 50, height: 50, borderRadius: 25, marginRight: 10, borderWidth: selectedAvatarIndex === index ? 3 : 0, borderColor: '#A2FF86' }}
-                                    />
-                                    <Text style={{ color: colors.black }}>{avatar.avatarNumber === 0 ? 'Default' : `Avatar ${avatar.avatarNumber}`}</Text>
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                            <View style={{ backgroundColor: colors.themeSecondary, padding: 20, borderRadius: 10, width: '80%', maxHeight: '80%' }}>
+                                <Text style={{ fontSize: 20, marginBottom: 10, fontWeight: 900,color: colors.black }}>Change Avatar</Text>
+                                {/* Avatar list */}
+                                <ScrollView>
+                                    {avatarImages.map((avatar, index) => (
+                                        <TouchableOpacity
+                                            key={index}
+                                            style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
+                                            onPress={() => handleAvatarSelection(index)}
+                                        >
+                                            <Image
+                                                source={avatar.imagePath}
+                                                style={{ width: 50, height: 50, borderRadius: 25, marginRight: 10, borderWidth: selectedAvatarIndex === index ? 3 : 0, borderColor: '#A2FF86' }}
+                                            />
+                                            <Text style={{ color: colors.black }}>{avatar.avatarNumber === 0 ? 'Default' : `Avatar ${avatar.avatarNumber}`}</Text>
 
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
+                                        </TouchableOpacity>
+                                    ))}
+                                </ScrollView>
 
-                        {/* Save and Cancel buttons */}
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-                            <TouchableOpacity style={{ backgroundColor: 'green', paddingHorizontal: 15, paddingVertical: 10, borderRadius: 5 }} onPress={handleSaveAvatar}>
-                                <Text style={{ color: colors.white, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>Save Change</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{ backgroundColor: colors.textRed, paddingHorizontal: 15, paddingVertical: 10, borderRadius: 5 }} onPress={() => setIsAvatarModalVisible(false)}>
-                                <Text style={{ color: colors.white, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>Cancel</Text>
-                            </TouchableOpacity>
+                                {/* Save and Cancel buttons */}
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+                                    <TouchableOpacity style={{ backgroundColor: 'green', paddingHorizontal: 15, paddingVertical: 10, borderRadius: 5 }} onPress={handleSaveAvatar}>
+                                        <Text style={{ color: colors.white, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>Save Change</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={{ backgroundColor: colors.textRed, paddingHorizontal: 15, paddingVertical: 10, borderRadius: 5 }} onPress={() => setIsAvatarModalVisible(false)}>
+                                        <Text style={{ color: colors.white, fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>Cancel</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
                         </View>
-                    </View>
-                </View>
-            </Modal>
+                    </Modal>
+
+                    {/* Modal for removing device */}
+                    <Modal visible={isRemoveDeviceModalVisible} animationType="slide" transparent={true}>
+                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                            <View style={{ backgroundColor: colors.white, padding: 20, borderRadius: 10, width: '80%' }}>
+                                <Text style={{ fontSize: 20, marginBottom: 10, color: colors.black }}>Enter Password</Text>
+                                <TextInput
+                                    style={{ borderWidth: 1, borderColor: colors.lightBlack, padding: 10, marginBottom: 10, placeholder:'black',color: colors.black }}
+                                    placeholder="Enter your password"
+                                    
+                                    secureTextEntry
+                                    value={password}
+                                    onChangeText={setPassword}
+                                />
+                                <TouchableOpacity 
+                                    style={{ 
+                                        backgroundColor: 'green', 
+                                        paddingHorizontal: 15, 
+                                        paddingVertical: 10, 
+                                        borderRadius: 5, 
+                                        marginTop: 10, 
+                                        alignSelf: 'center' 
+                                    }} 
+                                    onPress={handleRemoveDevice}
+                                    disabled={loading} // Disable the button when loading
+                                >
+                                    {loading ? (
+                                        <ActivityIndicator color="white" /> // Show loader if loading state is true
+                                    ) : (
+                                        <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', textAlign: 'center' }}>Remove Device</Text>
+                                    )}
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={{ backgroundColor: colors.textRed, paddingHorizontal: 15, paddingVertical: 10, borderRadius: 5, marginTop: 10,marginBottom: 10, alignSelf: 'center' }} onPress={() => setIsRemoveDeviceModalVisible(false)}>
+                                    <Text style={{ color: colors.white, fontSize: 18, fontWeight: 'bold', textAlign: 'center', }}>{t('Cancel')}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </Modal>
                 </View>
             </View>
         </View>
